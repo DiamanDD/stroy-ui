@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import PhoneIcon from '../components/PhoneIcon';
 import { CALLBACK, CONTACT } from '../constants/site';
 import { getCategoryBySlug } from '../data/categories';
+import { normalizeFio, sanitizeFioInput, validateFio } from '../lib/fioValidation';
 import { isCompletePhone, phoneMaskOnChange, phoneMaskOnFocus, phoneToE164 } from '../lib/phoneMask';
 import { submitLead } from '../lib/submitLead';
 
@@ -29,7 +30,8 @@ export default function Category() {
 
   function validate(): boolean {
     const next: Partial<FormState> = {};
-    if (!form.name.trim()) next.name = 'Введите имя';
+    const nameError = validateFio(form.name);
+    if (nameError) next.name = nameError;
     if (!form.phone.trim()) next.phone = 'Введите телефон';
     else if (!isCompletePhone(form.phone)) next.phone = 'Введите номер полностью';
     setErrors(next);
@@ -43,7 +45,7 @@ export default function Category() {
     setSubmitting(true);
     try {
       await submitLead({
-        name: form.name.trim(),
+        name: normalizeFio(form.name),
         phone: phoneToE164(form.phone),
         message: form.message.trim(),
         category: category.title,
@@ -167,13 +169,20 @@ export default function Category() {
                 </div>
                 <div>
                   <label className="block text-xs font-600 text-zinc-600 uppercase tracking-wider mb-1.5">
-                    Ваше имя <span className="text-orange-500">*</span>
+                    Имя и отчество <span className="text-orange-500">*</span>
                   </label>
                   <input
                     type="text"
+                    autoComplete="name"
+                    spellCheck={false}
                     value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Иван Иванов"
+                    onChange={(e) => setForm({ ...form, name: sanitizeFioInput(e.target.value) })}
+                    onBlur={() => {
+                      if (form.name.trim()) {
+                        setForm({ ...form, name: normalizeFio(form.name) });
+                      }
+                    }}
+                    placeholder="Иван Иванович"
                     className={`w-full border px-3 py-2.5 text-sm text-zinc-900 placeholder-gray-400 outline-none focus:border-orange-500 transition-colors ${
                       errors.name ? 'border-red-400' : 'border-gray-300'
                     }`}

@@ -24,6 +24,9 @@ const YOUGILE_API_URL = (process.env.YOUGILE_API_URL || 'https://yougile.com/api
 const YOUGILE_TOKEN = (process.env.YOUGILE_TOKEN || '').trim();
 const YOUGILE_COLUMN_ID = (process.env.YOUGILE_COLUMN_ID || 'd8a00f44-9db9-4109-ae5e-b645a5d845bd').trim();
 
+const LEAD_RATE_LIMIT_MAX = 30;
+const LEAD_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+
 const hits = new Map();
 
 function escapeHtml(value) {
@@ -76,10 +79,8 @@ function clientIp(req) {
 
 function rateLimited(ip) {
   const now = Date.now();
-  const windowMs = 10 * 60 * 1000;
-  const max = 8;
-  const recent = (hits.get(ip) || []).filter((ts) => now - ts < windowMs);
-  if (recent.length >= max) {
+  const recent = (hits.get(ip) || []).filter((ts) => now - ts < LEAD_RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= LEAD_RATE_LIMIT_MAX) {
     hits.set(ip, recent);
     return true;
   }
