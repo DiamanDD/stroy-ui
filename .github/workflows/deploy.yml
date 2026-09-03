@@ -93,6 +93,7 @@ jobs:
             --exclude='./.env' \
             --exclude='./.docker' \
             --exclude='./.cache' \
+            --exclude='./certs' \
             . | ssh -i ~/.ssh/deploy_key -p "${SSH_PORT}" "${TARGET}" \
             "tar xzf - -C '${DEPLOY_PATH}'"
 
@@ -118,6 +119,13 @@ jobs:
             export VITE_MAX_URL="${{ secrets.VITE_MAX_URL }}"
             export YOUGILE_TOKEN
             export YOUGILE_COLUMN_ID="${YOUGILE_COLUMN_ID:-d8a00f44-9db9-4109-ae5e-b645a5d845bd}"
+            HOST="$(printf '%s' "${VITE_MAX_URL}" | sed -E 's#^https?://##' | cut -d/ -f1 | cut -d: -f1)"
+            if [ -z "${HOST}" ]; then
+              HOST="${{ env.SSH_HOST }}"
+            fi
+            echo ">>> generate self-signed certificate for ${HOST}"
+            chmod +x scripts/generate-self-signed-cert.sh
+            ./scripts/generate-self-signed-cert.sh "${HOST}"
             echo ">>> docker compose down"
             docker compose down --remove-orphans || true
             echo ">>> docker compose build"
