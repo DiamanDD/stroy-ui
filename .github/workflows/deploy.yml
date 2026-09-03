@@ -128,23 +128,30 @@ jobs:
             export CERTBOT_EMAIL="${CERTBOT_EMAIL:-}"
             chmod +x scripts/setup-ssl.sh
             mkdir -p certbot/www certs/letsencrypt
+            CERT_FILE="certs/letsencrypt/live/${SSL_DOMAIN}/fullchain.pem"
             echo ">>> docker compose down"
             docker compose down --remove-orphans || true
             echo ">>> docker compose build"
             docker compose build --pull
-            echo ">>> start HTTP for ACME"
-            docker compose up -d --remove-orphans --force-recreate
-            echo ">>> wait for nginx"
-            for i in 1 2 3 4 5 6 7 8 9 10; do
-              if docker compose exec -T app nginx -t >/dev/null 2>&1; then
-                break
-              fi
-              sleep 2
-            done
-            echo ">>> obtain Let's Encrypt certificate"
-            ./scripts/setup-ssl.sh
-            echo ">>> reload nginx with TLS"
-            docker compose up -d --force-recreate app
+            if [ -f "${CERT_FILE}" ]; then
+              echo ">>> TLS certificate already present, skipping Let's Encrypt"
+              echo ">>> docker compose up"
+              docker compose up -d --remove-orphans --force-recreate
+            else
+              echo ">>> start HTTP for first certificate"
+              docker compose up -d --remove-orphans --force-recreate
+              echo ">>> wait for nginx"
+              for i in 1 2 3 4 5 6 7 8 9 10; do
+                if docker compose exec -T app nginx -t >/dev/null 2>&1; then
+                  break
+                fi
+                sleep 2
+              done
+              echo ">>> obtain Let's Encrypt certificate"
+              ./scripts/setup-ssl.sh
+              echo ">>> reload nginx with TLS"
+              docker compose up -d --force-recreate app
+            fi
             echo ">>> nginx config test"
             docker compose exec -T app nginx -t
             echo ">>> deploy done"
