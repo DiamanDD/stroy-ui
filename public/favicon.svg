@@ -1,17 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" fill="#09090b" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#f97316" />
   <path
-    d="M26 21.4 A10.5 10.5 0 1 0 26 38.6"
+    d="M41.2 16.4 A16.4 16.4 0 1 0 41.2 41.2"
     fill="none"
     stroke="#ffffff"
-    stroke-width="6.5"
-    stroke-linecap="square"
+    stroke-width="8.6"
+    stroke-linecap="butt"
   />
-  <path
-    d="M39 40 V20 L47 31 L55 20 V40"
-    fill="none"
-    stroke="#f97316"
-    stroke-width="6.5"
-    stroke-linecap="square"
-  />
+  <rect x="19" y="50.2" width="26" height="3.6" rx="0.4" fill="#ffffff" />
 </svg>
