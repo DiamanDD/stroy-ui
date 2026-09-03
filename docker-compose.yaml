@@ -1,0 +1,11 @@
+services:
+  app:
+    image: stroy-ui
+    container_name: stroy-ui
+    restart: unless-stopped
+    build:
+      context: .
+      args:
+        VITE_MAX_URL: ${VITE_MAX_URL}
+    ports:
+      - '3000:80'

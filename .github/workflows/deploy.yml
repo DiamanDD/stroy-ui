@@ -1,0 +1,86 @@
+name: Deploy westenterprise UI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate deploy secrets
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ] && missing+=("SSH_PRIVATE_KEY")
+          [ -z "${{ secrets.SSH_HOST }}" ] && missing+=("SSH_HOST")
+          [ -z "${{ secrets.SSH_USER }}" ] && missing+=("SSH_USER")
+          [ -z "${{ secrets.VITE_MAX_URL }}" ] && missing+=("VITE_MAX_URL")
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Missing required repository secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Sync files to server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          DEPLOY_PATH="${DEPLOY_PATH:-/opt/delivery-westenterprise-ui}"
+          TARGET="${SSH_USER}@${SSH_HOST}"
+
+          ssh -i ~/.ssh/deploy_key "${TARGET}" \
+            "mkdir -p '${DEPLOY_PATH}'"
+
+          tar czf - \
+            --exclude='./.git' \
+            --exclude='./.github' \
+            --exclude='./.idea' \
+            --exclude='./node_modules' \
+            --exclude='./dist' \
+            --exclude='./.env' \
+            --exclude='./.docker' \
+            --exclude='./.cache' \
+            . | ssh -i ~/.ssh/deploy_key "${TARGET}" \
+            "tar xzf - -C '${DEPLOY_PATH}'"
+
+      - name: Build and start containers
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 30m
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH != '' && secrets.DEPLOY_PATH || '/opt/delivery-westenterprise-ui' }}"
+            cd "$DEPLOY_PATH"
+            export DOCKER_CONFIG="${DEPLOY_PATH}/.docker"
+            export XDG_CACHE_HOME="${DEPLOY_PATH}/.cache"
+            mkdir -p "$DOCKER_CONFIG" "$XDG_CACHE_HOME"
+            export VITE_MAX_URL="${{ secrets.VITE_MAX_URL }}"
+            echo ">>> docker compose down"
+            docker compose down --remove-orphans || true
+            echo ">>> docker compose build"
+            docker compose build --pull
+            echo ">>> docker compose up"
+            docker compose up -d --remove-orphans --force-recreate
+            echo ">>> nginx config test"
+            docker compose exec -T app nginx -t
+            echo ">>> deploy done"
