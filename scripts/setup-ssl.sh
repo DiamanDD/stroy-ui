@@ -25,7 +25,7 @@ echo ">>> requesting Let's Encrypt certificate for ${DOMAIN}"
 cd "${ROOT_DIR}"
 
 if docker compose ps --status running app >/dev/null 2>&1; then
-  docker compose run --rm certbot certonly \
+  docker compose run --rm --entrypoint certbot certbot certonly \
     --webroot -w /var/www/certbot \
     -d "${DOMAIN}" \
     --email "${EMAIL}" \
@@ -34,7 +34,7 @@ if docker compose ps --status running app >/dev/null 2>&1; then
     --keep-until-expiring \
     --preferred-challenges http
 else
-  docker compose run --rm -p 80:80 certbot certonly \
+  docker compose run --rm -p 80:80 --entrypoint certbot certbot certonly \
     --standalone \
     -d "${DOMAIN}" \
     --email "${EMAIL}" \
