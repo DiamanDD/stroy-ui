@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CERT_DIR="${CERT_DIR:-${ROOT_DIR}/certs}"
 DAYS="${CERT_DAYS:-825}"
-CN="${1:-localhost}"
+CN="$(printf '%s' "${1:-localhost}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^\[//;s/\]$//')"
 
 mkdir -p "$CERT_DIR"
 
@@ -18,11 +18,42 @@ if ! command -v openssl >/dev/null 2>&1; then
   exit 1
 fi
 
-SAN="DNS:localhost,DNS:${CN}"
-if [[ "${CN}" =~ ^[0-9.]+$ ]]; then
-  SAN="IP:${CN},${SAN}"
+is_valid_ipv4() {
+  local ip="$1"
+  [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || return 1
+
+  local IFS='.'
+  local octet
+  for octet in $ip; do
+    [[ "$octet" -le 255 ]] || return 1
+  done
+
+  return 0
+}
+
+is_valid_dns() {
+  local name="$1"
+  [[ ${#name} -ge 1 && ${#name} -le 253 ]] || return 1
+  [[ "$name" =~ ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*$ ]]
+}
+
+if [[ -z "$CN" ]]; then
+  CN="localhost"
+fi
+
+SAN="DNS:localhost"
+if [[ "$CN" =~ ^[0-9.]+$ ]]; then
+  if is_valid_ipv4 "$CN"; then
+    SAN="IP:${CN},DNS:localhost"
+  else
+    echo "Warning: '${CN}' looks like an IP address but is invalid; using localhost." >&2
+    CN="localhost"
+  fi
+elif is_valid_dns "$CN"; then
+  SAN="DNS:${CN},DNS:localhost"
 else
-  SAN="DNS:${CN},${SAN}"
+  echo "Warning: '${CN}' is not a valid DNS name; using localhost." >&2
+  CN="localhost"
 fi
 
 openssl req -x509 -nodes -days "${DAYS}" -newkey rsa:2048 \

@@ -119,9 +119,12 @@ jobs:
             export VITE_MAX_URL="${{ secrets.VITE_MAX_URL }}"
             export YOUGILE_TOKEN
             export YOUGILE_COLUMN_ID="${YOUGILE_COLUMN_ID:-d8a00f44-9db9-4109-ae5e-b645a5d845bd}"
-            HOST="$(printf '%s' "${VITE_MAX_URL}" | sed -E 's#^https?://##' | cut -d/ -f1 | cut -d: -f1)"
+            HOST="$(printf '%s' "${{ env.SSH_HOST }}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
             if [ -z "${HOST}" ]; then
-              HOST="${{ env.SSH_HOST }}"
+              HOST="$(printf '%s' "${VITE_MAX_URL}" | sed -E 's#^https?://##' | cut -d/ -f1 | cut -d: -f1 | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            fi
+            if [ -z "${HOST}" ]; then
+              HOST="localhost"
             fi
             echo ">>> generate self-signed certificate for ${HOST}"
             chmod +x scripts/generate-self-signed-cert.sh
