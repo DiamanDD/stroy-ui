@@ -27,3 +27,4 @@ npm-debug.log*
 
 # TLS certificates (generated on server)
 certs/
+certbot/

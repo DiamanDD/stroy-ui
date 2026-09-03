@@ -94,6 +94,7 @@ jobs:
             --exclude='./.docker' \
             --exclude='./.cache' \
             --exclude='./certs' \
+            --exclude='./certbot' \
             . | ssh -i ~/.ssh/deploy_key -p "${SSH_PORT}" "${TARGET}" \
             "tar xzf - -C '${DEPLOY_PATH}'"
 
@@ -102,13 +103,15 @@ jobs:
         env:
           YOUGILE_TOKEN: ${{ secrets.YOUGILE_TOKEN }}
           YOUGILE_COLUMN_ID: ${{ secrets.YOUGILE_COLUMN_ID }}
+          SSL_DOMAIN: ${{ secrets.SSL_DOMAIN }}
+          CERTBOT_EMAIL: ${{ secrets.CERTBOT_EMAIL }}
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           port: ${{ env.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
-          envs: YOUGILE_TOKEN,YOUGILE_COLUMN_ID
+          envs: YOUGILE_TOKEN,YOUGILE_COLUMN_ID,SSL_DOMAIN,CERTBOT_EMAIL
           script: |
             set -e
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH != '' && secrets.DEPLOY_PATH || '/opt/stroy-ui' }}"
@@ -119,22 +122,23 @@ jobs:
             export VITE_MAX_URL="${{ secrets.VITE_MAX_URL }}"
             export YOUGILE_TOKEN
             export YOUGILE_COLUMN_ID="${YOUGILE_COLUMN_ID:-d8a00f44-9db9-4109-ae5e-b645a5d845bd}"
+            export SSL_DOMAIN="${SSL_DOMAIN:-}"
+            export CERTBOT_EMAIL="${CERTBOT_EMAIL:-}"
             HOST="$(printf '%s' "${{ env.SSH_HOST }}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-            if [ -z "${HOST}" ]; then
-              HOST="$(printf '%s' "${VITE_MAX_URL}" | sed -E 's#^https?://##' | cut -d/ -f1 | cut -d: -f1 | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-            fi
             if [ -z "${HOST}" ]; then
               HOST="localhost"
             fi
-            echo ">>> generate self-signed certificate for ${HOST}"
-            chmod +x scripts/generate-self-signed-cert.sh
-            ./scripts/generate-self-signed-cert.sh "${HOST}"
+            chmod +x scripts/generate-self-signed-cert.sh scripts/setup-ssl.sh scripts/certbot-deploy-hook.sh
+            echo ">>> prepare fallback certificate"
+            ./scripts/setup-ssl.sh "${HOST}"
             echo ">>> docker compose down"
             docker compose down --remove-orphans || true
             echo ">>> docker compose build"
             docker compose build --pull
             echo ">>> docker compose up"
             docker compose up -d --remove-orphans --force-recreate
+            echo ">>> setup trusted certificate if configured"
+            ./scripts/setup-ssl.sh "${HOST}"
             echo ">>> nginx config test"
             docker compose exec -T app nginx -t
             echo ">>> deploy done"
