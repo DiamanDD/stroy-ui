@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import PhoneIcon from '../components/PhoneIcon';
 import { CALLBACK, CONTACT } from '../constants/site';
 import { getCategoryBySlug } from '../data/categories';
+import { isCompletePhone, phoneMaskOnChange, phoneMaskOnFocus, phoneToE164 } from '../lib/phoneMask';
 import { submitLead } from '../lib/submitLead';
 
 interface FormState {
@@ -30,7 +31,7 @@ export default function Category() {
     const next: Partial<FormState> = {};
     if (!form.name.trim()) next.name = 'Введите имя';
     if (!form.phone.trim()) next.phone = 'Введите телефон';
-    else if (!/^[\d\s\+\-\(\)]{7,}$/.test(form.phone)) next.phone = 'Некорректный номер';
+    else if (!isCompletePhone(form.phone)) next.phone = 'Введите номер полностью';
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -43,7 +44,7 @@ export default function Category() {
     try {
       await submitLead({
         name: form.name.trim(),
-        phone: form.phone.trim(),
+        phone: phoneToE164(form.phone),
         message: form.message.trim(),
         category: category.title,
         website: form.website,
@@ -186,8 +187,16 @@ export default function Category() {
                   </label>
                   <input
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    onFocus={() => {
+                      const masked = phoneMaskOnFocus(form.phone);
+                      if (masked !== form.phone) {
+                        setForm({ ...form, phone: masked });
+                      }
+                    }}
+                    onChange={(e) => setForm({ ...form, phone: phoneMaskOnChange(e.target.value) })}
                     placeholder={CONTACT.phonePlaceholder}
                     className={`w-full border px-3 py-2.5 text-sm text-zinc-900 placeholder-gray-400 outline-none focus:border-orange-500 transition-colors ${
                       errors.phone ? 'border-red-400' : 'border-gray-300'
