@@ -1,4 +1,4 @@
-import { createHashRouter as createBrowserRouter } from 'react-router';
+import { createBrowserRouter } from 'react-router';
 import Home from './pages/Home';
 import Category from './pages/Category';
 
