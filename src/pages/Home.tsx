@@ -1,10 +1,10 @@
 import { Link } from 'react-router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import BrandName from '../components/BrandName';
+import PhoneIcon from '../components/PhoneIcon';
+import { CALLBACK, CONTACT, LOCATION, SITE, STATS, WORKING_DAYS_PER_WEEK } from '../constants/site';
 import { categories } from '../data/categories';
-
-const PHONE_HREF = 'tel:+78615934567';
-const PHONE = '+7 (86159) 3-45-67';
 
 export default function Home() {
   return (
@@ -19,25 +19,23 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 mb-5">
               <span className="w-8 h-0.5 bg-orange-500 block" />
               <span className="font-display text-xs font-600 tracking-widest text-orange-500 uppercase">
-                Краснодарский край
+                {LOCATION.region}
               </span>
             </div>
 
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-700 leading-none tracking-tight mb-4">
-              СТРОЙ<span className="text-orange-500 block">МАРКЕТ</span>
+              <BrandName accentClassName="text-orange-500 block" />
             </h1>
 
-            <p className="text-gray-400 text-base sm:text-lg leading-relaxed mb-8 max-w-sm">
-              Строительные материалы, инструменты и всё необходимое для ремонта — в одном месте.
-            </p>
+            <p className="text-gray-400 text-base sm:text-lg leading-relaxed mb-8 max-w-sm">{SITE.tagline}</p>
 
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href={PHONE_HREF}
+                href={CONTACT.phoneHref}
                 className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-display text-base font-600 px-6 py-3 transition-colors"
               >
                 <PhoneIcon />
-                {PHONE}
+                {CONTACT.phone}
               </a>
               <a
                 href="#categories"
@@ -51,16 +49,16 @@ export default function Home() {
             {/* Info strips */}
             <div className="mt-10 grid grid-cols-3 gap-4 border-t border-zinc-800 pt-8">
               <div>
-                <div className="font-display text-2xl font-700 text-orange-500">8+</div>
+                <div className="font-display text-2xl font-700 text-orange-500">{categories.length}+</div>
                 <div className="text-xs text-gray-500 mt-0.5">категорий товаров</div>
               </div>
               <div>
-                <div className="font-display text-2xl font-700 text-orange-500">1000+</div>
-                <div className="text-xs text-gray-500 mt-0.5">наименований</div>
+                <div className="font-display text-2xl font-700 text-orange-500">{STATS.productCount}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{STATS.productCountLabel}</div>
               </div>
               <div>
-                <div className="font-display text-2xl font-700 text-orange-500">6 дн</div>
-                <div className="text-xs text-gray-500 mt-0.5">в неделю</div>
+                <div className="font-display text-2xl font-700 text-orange-500">{WORKING_DAYS_PER_WEEK} дн</div>
+                <div className="text-xs text-gray-500 mt-0.5">{STATS.workingDaysLabel}</div>
               </div>
             </div>
           </div>
@@ -119,9 +117,7 @@ export default function Home() {
                   <h3 className="font-display text-base sm:text-lg font-600 text-zinc-950 leading-tight tracking-tight uppercase group-hover:text-orange-500 transition-colors">
                     {cat.titleShort}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1 leading-snug line-clamp-2">
-                    {cat.subtitle}
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1 leading-snug line-clamp-2">{cat.subtitle}</p>
                   <div className="mt-2 flex items-center gap-1 text-orange-500 text-xs font-600">
                     <span>Подробнее</span>
                     <ArrowRightIcon />
@@ -140,12 +136,10 @@ export default function Home() {
             <p className="font-display text-xl sm:text-2xl font-700 text-white uppercase tracking-tight">
               Нужна консультация?
             </p>
-            <p className="text-orange-100 text-sm mt-0.5">
-              Перезвоним в течение 15 минут
-            </p>
+            <p className="text-orange-100 text-sm mt-0.5">{CALLBACK.promise}</p>
           </div>
           <a
-            href={PHONE_HREF}
+            href={CONTACT.phoneHref}
             className="inline-flex items-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-display text-base font-700 px-6 py-3 transition-colors whitespace-nowrap"
           >
             <PhoneIcon />
@@ -156,14 +150,6 @@ export default function Home() {
 
       <Footer />
     </div>
-  );
-}
-
-function PhoneIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.45 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.55 5.55l.62-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-    </svg>
   );
 }
 

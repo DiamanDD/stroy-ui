@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PhoneIcon from '../components/PhoneIcon';
+import { CALLBACK, CONTACT } from '../constants/site';
 import { getCategoryBySlug } from '../data/categories';
 import { submitLead } from '../lib/submitLead';
-
-const PHONE = '+7 (86159) 3-45-67';
-const PHONE_HREF = 'tel:+78615934567';
 
 interface FormState {
   name: string;
@@ -123,11 +122,11 @@ export default function Category() {
                 Позвоните нам — ответим на любые вопросы
               </p>
               <a
-                href={PHONE_HREF}
+                href={CONTACT.phoneHref}
                 className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-display text-base font-600 px-5 py-3 transition-colors"
               >
                 <PhoneIcon />
-                {PHONE}
+                {CONTACT.phone}
               </a>
             </div>
           </div>
@@ -143,9 +142,7 @@ export default function Category() {
               <div className="bg-green-50 border border-green-200 p-6 text-center">
                 <div className="text-3xl mb-3">✓</div>
                 <p className="font-display text-lg font-600 text-zinc-950 uppercase">Заявка принята!</p>
-                <p className="text-gray-600 text-sm mt-2">
-                  Мы перезвоним вам в течение 15 минут в рабочее время.
-                </p>
+                <p className="text-gray-600 text-sm mt-2">{CALLBACK.successMessage}</p>
                 <button
                   onClick={() => { setSubmitted(false); setSubmitError(''); setForm({ name: '', phone: '', message: '', website: '' }); }}
                   className="mt-4 text-sm text-orange-500 hover:text-orange-600 underline"
@@ -191,7 +188,7 @@ export default function Category() {
                     type="tel"
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="+7 (___) ___-__-__"
+                    placeholder={CONTACT.phonePlaceholder}
                     className={`w-full border px-3 py-2.5 text-sm text-zinc-900 placeholder-gray-400 outline-none focus:border-orange-500 transition-colors ${
                       errors.phone ? 'border-red-400' : 'border-gray-300'
                     }`}
@@ -236,11 +233,11 @@ export default function Category() {
             </div>
 
             <a
-              href={PHONE_HREF}
+              href={CONTACT.phoneHref}
               className="mt-4 flex items-center justify-center gap-2 border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-display text-base font-600 py-3 uppercase tracking-wide transition-colors"
             >
               <PhoneIcon />
-              {PHONE}
+              {CONTACT.phone}
             </a>
           </div>
         </div>
@@ -249,7 +246,7 @@ export default function Category() {
       {/* Mobile sticky call bar */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-white border-t border-gray-200 p-3 flex gap-2">
         <a
-          href={PHONE_HREF}
+          href={CONTACT.phoneHref}
           className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-display text-base font-600 py-3 transition-colors"
         >
           <PhoneIcon />
@@ -266,14 +263,6 @@ export default function Category() {
 
       <Footer />
     </div>
-  );
-}
-
-function PhoneIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.45 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.55 5.55l.62-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-    </svg>
   );
 }
 
