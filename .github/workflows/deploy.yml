@@ -24,28 +24,63 @@ jobs:
             exit 1
           fi
 
-      - name: Setup SSH
+      - name: Normalize SSH secrets
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          set -euo pipefail
+          trim() { printf '%s' "$1" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; }
+          host="$(trim "${SSH_HOST}")"
+          user="$(trim "${SSH_USER}")"
+          host="${host#ssh://}"
+          host="${host#https://}"
+          host="${host#http://}"
+          if [[ "$host" == *@* ]]; then
+            user="${host%@*}"
+            host="${host##*@}"
+          fi
+          ssh_port=22
+          if [[ "$host" == \[*\]:* ]]; then
+            ssh_port="${host##*:}"
+            host="${host%:*}"
+            host="${host#[}"
+            host="${host%]}"
+          elif [[ "$host" =~ ^[0-9.]+(:[0-9]+)?$ || "$host" =~ ^[A-Za-z0-9.-]+(:[0-9]+)?$ ]]; then
+            if [[ "$host" == *:* ]]; then
+              ssh_port="${host##*:}"
+              host="${host%:*}"
+            fi
+          fi
+          if [[ "$host" =~ [^A-Za-z0-9.:_-] ]]; then
+            echo "SSH_HOST has invalid characters after cleanup (length=${#host})."
+            echo "Set the secret to an IP or hostname only, without quotes, user@, or a trailing newline."
+            exit 1
+          fi
+          {
+            echo "SSH_HOST=${host}"
+            echo "SSH_USER=${user}"
+            echo "SSH_PORT=${ssh_port}"
+          } >> "$GITHUB_ENV"
+
+      - name: Setup SSH
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${SSH_HOST}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -p "${SSH_PORT}" -H "${SSH_HOST}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Sync files to server
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           set -euo pipefail
           DEPLOY_PATH="${DEPLOY_PATH:-/opt/stroy-ui}"
           TARGET="${SSH_USER}@${SSH_HOST}"
 
-          ssh -i ~/.ssh/deploy_key "${TARGET}" \
+          ssh -i ~/.ssh/deploy_key -p "${SSH_PORT}" "${TARGET}" \
             "mkdir -p '${DEPLOY_PATH}'"
 
           tar czf - \
@@ -57,14 +92,15 @@ jobs:
             --exclude='./.env' \
             --exclude='./.docker' \
             --exclude='./.cache' \
-            . | ssh -i ~/.ssh/deploy_key "${TARGET}" \
+            . | ssh -i ~/.ssh/deploy_key -p "${SSH_PORT}" "${TARGET}" \
             "tar xzf - -C '${DEPLOY_PATH}'"
 
       - name: Build and start containers
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          port: ${{ env.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
           script: |
