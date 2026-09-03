@@ -13,6 +13,7 @@ if [[ -z "${DOMAIN}" || -z "${EMAIL}" ]]; then
 fi
 
 mkdir -p "${WEBROOT}" "${LE_DIR}"
+cd "${ROOT_DIR}"
 
 CERT_FILE="${LE_DIR}/live/${DOMAIN}/fullchain.pem"
 if [[ -f "${CERT_FILE}" ]]; then
@@ -20,18 +21,23 @@ if [[ -f "${CERT_FILE}" ]]; then
   exit 0
 fi
 
-echo ">>> requesting Let's Encrypt certificate for ${DOMAIN}"
+is_app_running() {
+  docker compose ps --status running --format '{{.Service}}' 2>/dev/null | grep -qx 'app'
+}
 
-cd "${ROOT_DIR}"
+is_stale_account_error() {
+  grep -Eq 'Unable to validate JWS|Account ".*" not found'
+}
 
 reset_stale_account() {
   echo ">>> resetting stale Let's Encrypt account"
   rm -rf "${LE_DIR}/accounts"
 }
 
-request_cert() {
-  if docker compose ps --status running app >/dev/null 2>&1; then
-    docker compose run --rm --entrypoint certbot certbot certonly \
+run_certbot() {
+  local mode="$1"
+  if [[ "${mode}" == "webroot" ]]; then
+    docker compose run --rm --no-deps --entrypoint certbot certbot certonly \
       --webroot -w /var/www/certbot \
       -d "${DOMAIN}" \
       --email "${EMAIL}" \
@@ -39,26 +45,54 @@ request_cert() {
       --non-interactive \
       --keep-until-expiring \
       --preferred-challenges http
-  else
-    docker compose run --rm -p 80:80 --entrypoint certbot certbot certonly \
-      --standalone \
-      -d "${DOMAIN}" \
-      --email "${EMAIL}" \
-      --agree-tos \
-      --non-interactive \
-      --keep-until-expiring \
-      --preferred-challenges http
+    return
   fi
+
+  docker compose run --rm --no-deps --publish 80:80 --entrypoint certbot certbot certonly \
+    --standalone \
+    -d "${DOMAIN}" \
+    --email "${EMAIL}" \
+    --agree-tos \
+    --non-interactive \
+    --keep-until-expiring \
+    --preferred-challenges http
 }
 
-if ! request_cert; then
-  echo ">>> first Let's Encrypt attempt failed; retrying with a new account"
-  reset_stale_account
-  request_cert
+request_cert() {
+  local mode="$1"
+  local output=""
+  local status=0
+
+  set +e
+  output="$(run_certbot "${mode}" 2>&1)"
+  status=$?
+  set -e
+  printf '%s\n' "${output}"
+
+  if [[ "${status}" -eq 0 ]]; then
+    return 0
+  fi
+
+  if printf '%s\n' "${output}" | is_stale_account_error; then
+    reset_stale_account
+    run_certbot "${mode}"
+    return
+  fi
+
+  return "${status}"
+}
+
+if is_app_running; then
+  echo ">>> requesting Let's Encrypt certificate for ${DOMAIN} via webroot"
+  request_cert webroot
+else
+  echo ">>> requesting Let's Encrypt certificate for ${DOMAIN} via standalone"
+  request_cert standalone
 fi
 
 if [[ ! -f "${CERT_FILE}" ]]; then
-  echo "Failed to obtain Let's Encrypt certificate for ${DOMAIN}" >&2
+  echo "Failed to obtain Let's Encrypt certificate for ${DOMAIN}." >&2
+  echo "Let's Encrypt must reach http://${DOMAIN}/.well-known/acme-challenge/ on port 80." >&2
   exit 1
 fi
 
