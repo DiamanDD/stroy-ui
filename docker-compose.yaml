@@ -1,8 +1,23 @@
 services:
+  api:
+    image: stroy-ui-api
+    container_name: stroy-ui-api
+    restart: unless-stopped
+    build:
+      context: ./api
+    environment:
+      YOUGILE_TOKEN: ${YOUGILE_TOKEN}
+      YOUGILE_COLUMN_ID: ${YOUGILE_COLUMN_ID:-d8a00f44-9db9-4109-ae5e-b645a5d845bd}
+      YOUGILE_API_URL: ${YOUGILE_API_URL:-https://yougile.com/api-v2}
+    expose:
+      - '3001'
+
   app:
     image: stroy-ui
     container_name: stroy-ui
     restart: unless-stopped
+    depends_on:
+      - api
     build:
       context: .
       args:

@@ -19,6 +19,7 @@ jobs:
           [ -z "${{ secrets.SSH_HOST }}" ] && missing+=("SSH_HOST")
           [ -z "${{ secrets.SSH_USER }}" ] && missing+=("SSH_USER")
           [ -z "${{ secrets.VITE_MAX_URL }}" ] && missing+=("VITE_MAX_URL")
+          [ -z "${{ secrets.YOUGILE_TOKEN }}" ] && missing+=("YOUGILE_TOKEN")
           if [ "${#missing[@]}" -gt 0 ]; then
             echo "Missing required repository secrets: ${missing[*]}"
             exit 1
@@ -97,12 +98,16 @@ jobs:
 
       - name: Build and start containers
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          YOUGILE_TOKEN: ${{ secrets.YOUGILE_TOKEN }}
+          YOUGILE_COLUMN_ID: ${{ secrets.YOUGILE_COLUMN_ID }}
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           port: ${{ env.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 30m
+          envs: YOUGILE_TOKEN,YOUGILE_COLUMN_ID
           script: |
             set -e
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH != '' && secrets.DEPLOY_PATH || '/opt/stroy-ui' }}"
@@ -111,6 +116,8 @@ jobs:
             export XDG_CACHE_HOME="${DEPLOY_PATH}/.cache"
             mkdir -p "$DOCKER_CONFIG" "$XDG_CACHE_HOME"
             export VITE_MAX_URL="${{ secrets.VITE_MAX_URL }}"
+            export YOUGILE_TOKEN
+            export YOUGILE_COLUMN_ID="${YOUGILE_COLUMN_ID:-d8a00f44-9db9-4109-ae5e-b645a5d845bd}"
             echo ">>> docker compose down"
             docker compose down --remove-orphans || true
             echo ">>> docker compose build"

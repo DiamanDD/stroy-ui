@@ -3,6 +3,7 @@ import { Link, useParams, Navigate } from 'react-router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getCategoryBySlug } from '../data/categories';
+import { submitLead } from '../lib/submitLead';
 
 const PHONE = '+7 (86159) 3-45-67';
 const PHONE_HREF = 'tel:+78615934567';
@@ -19,6 +20,8 @@ export default function Category() {
 
   const [form, setForm] = useState<FormState>({ name: '', phone: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [errors, setErrors] = useState<Partial<FormState>>({});
 
   if (!category) return <Navigate to="/" replace />;
@@ -32,9 +35,24 @@ export default function Category() {
     return Object.keys(next).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (validate()) setSubmitted(true);
+    setSubmitError('');
+    if (!validate() || !category) return;
+    setSubmitting(true);
+    try {
+      await submitLead({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        message: form.message.trim(),
+        category: category.title,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Не удалось отправить заявку');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -127,7 +145,7 @@ export default function Category() {
                   Мы перезвоним вам в течение 15 минут в рабочее время.
                 </p>
                 <button
-                  onClick={() => { setSubmitted(false); setForm({ name: '', phone: '', message: '' }); }}
+                  onClick={() => { setSubmitted(false); setSubmitError(''); setForm({ name: '', phone: '', message: '' }); }}
                   className="mt-4 text-sm text-orange-500 hover:text-orange-600 underline"
                 >
                   Отправить ещё одну заявку
@@ -180,11 +198,14 @@ export default function Category() {
                   />
                 </div>
 
+                {submitError && <p className="text-sm text-red-500">{submitError}</p>}
+
                 <button
                   type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-display text-base font-600 py-3 uppercase tracking-wide transition-colors"
+                  disabled={submitting}
+                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-display text-base font-600 py-3 uppercase tracking-wide transition-colors"
                 >
-                  Отправить заявку
+                  {submitting ? 'Отправка...' : 'Отправить заявку'}
                 </button>
 
                 <p className="text-xs text-gray-400 text-center">
