@@ -1,4 +1,4 @@
-name: Deploy westenterprise UI
+name: Deploy stroy-ui
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           set -euo pipefail
-          DEPLOY_PATH="${DEPLOY_PATH:-/opt/delivery-westenterprise-ui}"
+          DEPLOY_PATH="${DEPLOY_PATH:-/opt/stroy-ui}"
           TARGET="${SSH_USER}@${SSH_HOST}"
 
           ssh -i ~/.ssh/deploy_key "${TARGET}" \
@@ -69,7 +69,7 @@ jobs:
           command_timeout: 30m
           script: |
             set -e
-            DEPLOY_PATH="${{ secrets.DEPLOY_PATH != '' && secrets.DEPLOY_PATH || '/opt/delivery-westenterprise-ui' }}"
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH != '' && secrets.DEPLOY_PATH || '/opt/stroy-ui' }}"
             cd "$DEPLOY_PATH"
             export DOCKER_CONFIG="${DEPLOY_PATH}/.docker"
             export XDG_CACHE_HOME="${DEPLOY_PATH}/.cache"
