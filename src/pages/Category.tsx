@@ -12,13 +12,14 @@ interface FormState {
   name: string;
   phone: string;
   message: string;
+  website: string;
 }
 
 export default function Category() {
   const { slug } = useParams<{ slug: string }>();
   const category = slug ? getCategoryBySlug(slug) : undefined;
 
-  const [form, setForm] = useState<FormState>({ name: '', phone: '', message: '' });
+  const [form, setForm] = useState<FormState>({ name: '', phone: '', message: '', website: '' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -46,6 +47,7 @@ export default function Category() {
         phone: form.phone.trim(),
         message: form.message.trim(),
         category: category.title,
+        website: form.website,
       });
       setSubmitted(true);
     } catch (err) {
@@ -145,14 +147,26 @@ export default function Category() {
                   Мы перезвоним вам в течение 15 минут в рабочее время.
                 </p>
                 <button
-                  onClick={() => { setSubmitted(false); setSubmitError(''); setForm({ name: '', phone: '', message: '' }); }}
+                  onClick={() => { setSubmitted(false); setSubmitError(''); setForm({ name: '', phone: '', message: '', website: '' }); }}
                   className="mt-4 text-sm text-orange-500 hover:text-orange-600 underline"
                 >
                   Отправить ещё одну заявку
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} noValidate className="space-y-4">
+              <form onSubmit={handleSubmit} noValidate className="space-y-4 relative">
+                <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                  <label htmlFor="website">Сайт</label>
+                  <input
+                    id="website"
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.website}
+                    onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-600 text-zinc-600 uppercase tracking-wider mb-1.5">
                     Ваше имя <span className="text-orange-500">*</span>

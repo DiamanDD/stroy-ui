@@ -63,6 +63,10 @@ function readBody(req) {
 }
 
 function clientIp(req) {
+  const realIp = req.headers['x-real-ip'];
+  if (typeof realIp === 'string' && realIp.trim()) {
+    return realIp.trim();
+  }
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string' && forwarded.trim()) {
     return forwarded.split(',')[0].trim();
@@ -159,6 +163,10 @@ const server = http.createServer(async (req, res) => {
   try {
     const raw = await readBody(req);
     const data = raw ? JSON.parse(raw) : {};
+    if (String(data.website || '').trim()) {
+      json(res, 200, { ok: true });
+      return;
+    }
     const lead = validateLead(data);
     if (typeof lead === 'string') {
       json(res, 400, { error: lead });

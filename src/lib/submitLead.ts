@@ -3,6 +3,7 @@ export interface LeadPayload {
   phone: string;
   message: string;
   category: string;
+  website?: string;
 }
 
 export async function submitLead(payload: LeadPayload): Promise<void> {
@@ -13,6 +14,9 @@ export async function submitLead(payload: LeadPayload): Promise<void> {
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error('Слишком много заявок. Попробуйте позже.');
+    }
     const data = (await response.json().catch(() => null)) as { error?: string } | null;
     throw new Error(data?.error || 'Не удалось отправить заявку');
   }
