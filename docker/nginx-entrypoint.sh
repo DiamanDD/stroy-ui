@@ -1,12 +1,15 @@
 #!/usr/bin/env sh
 set -eu
 
-DOMAIN="${SSL_DOMAIN:-}"
-LE_DIR="/etc/letsencrypt/live/${DOMAIN}"
-
-if [ -n "${DOMAIN}" ] && [ -f "${LE_DIR}/fullchain.pem" ] && [ -f "${LE_DIR}/privkey.pem" ]; then
-  cp -L "${LE_DIR}/fullchain.pem" /etc/nginx/certs/fullchain.pem
-  cp -L "${LE_DIR}/privkey.pem" /etc/nginx/certs/privkey.pem
+if [ -z "${SSL_DOMAIN:-}" ]; then
+  echo "SSL_DOMAIN is required." >&2
+  exit 1
 fi
 
+if [ ! -f "/etc/letsencrypt/live/${SSL_DOMAIN}/fullchain.pem" ] || [ ! -f "/etc/letsencrypt/live/${SSL_DOMAIN}/privkey.pem" ]; then
+  echo "Let's Encrypt certificate not found for ${SSL_DOMAIN}." >&2
+  exit 1
+fi
+
+envsubst '${SSL_DOMAIN}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 exec nginx -g 'daemon off;'

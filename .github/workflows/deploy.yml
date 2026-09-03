@@ -20,6 +20,8 @@ jobs:
           [ -z "${{ secrets.SSH_USER }}" ] && missing+=("SSH_USER")
           [ -z "${{ secrets.VITE_MAX_URL }}" ] && missing+=("VITE_MAX_URL")
           [ -z "${{ secrets.YOUGILE_TOKEN }}" ] && missing+=("YOUGILE_TOKEN")
+          [ -z "${{ secrets.SSL_DOMAIN }}" ] && missing+=("SSL_DOMAIN")
+          [ -z "${{ secrets.CERTBOT_EMAIL }}" ] && missing+=("CERTBOT_EMAIL")
           if [ "${#missing[@]}" -gt 0 ]; then
             echo "Missing required repository secrets: ${missing[*]}"
             exit 1
@@ -124,21 +126,19 @@ jobs:
             export YOUGILE_COLUMN_ID="${YOUGILE_COLUMN_ID:-d8a00f44-9db9-4109-ae5e-b645a5d845bd}"
             export SSL_DOMAIN="${SSL_DOMAIN:-}"
             export CERTBOT_EMAIL="${CERTBOT_EMAIL:-}"
-            HOST="$(printf '%s' "${{ env.SSH_HOST }}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-            if [ -z "${HOST}" ]; then
-              HOST="localhost"
-            fi
-            chmod +x scripts/generate-self-signed-cert.sh scripts/setup-ssl.sh scripts/certbot-deploy-hook.sh
-            echo ">>> prepare fallback certificate"
-            ./scripts/setup-ssl.sh "${HOST}"
+            chmod +x scripts/setup-ssl.sh
             echo ">>> docker compose down"
             docker compose down --remove-orphans || true
             echo ">>> docker compose build"
             docker compose build --pull
+            echo ">>> obtain Let's Encrypt certificate"
+            ./scripts/setup-ssl.sh
             echo ">>> docker compose up"
             docker compose up -d --remove-orphans --force-recreate
-            echo ">>> setup trusted certificate if configured"
-            ./scripts/setup-ssl.sh "${HOST}"
+            if [ ! -f "certs/letsencrypt/live/${SSL_DOMAIN}/fullchain.pem" ]; then
+              echo ">>> retry certificate via webroot"
+              ./scripts/setup-ssl.sh
+            fi
             echo ">>> nginx config test"
             docker compose exec -T app nginx -t
             echo ">>> deploy done"
