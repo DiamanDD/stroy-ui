@@ -14,7 +14,7 @@ export const categories: Category[] = [
     title: 'Строительные материалы',
     titleShort: 'Стройматериалы',
     subtitle: 'Кирпич, блоки, цемент, песок',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=540&fit=crop&auto=format',
+    image: '/images/stroymaterialy.jpg',
     description:
       'Широкий ассортимент строительных материалов для любых задач: от закладки фундамента до возведения кровли. Работаем с частными клиентами и строительными организациями.',
     items: [
@@ -33,7 +33,7 @@ export const categories: Category[] = [
     title: 'Инструменты и оборудование',
     titleShort: 'Инструменты',
     subtitle: 'Ручной и электрический инструмент',
-    image: 'https://images.unsplash.com/photo-1683115099191-51e617fc5ff1?w=800&h=540&fit=crop&auto=format',
+    image: '/images/instrumenty.jpg',
     description:
       'Профессиональный и бытовой инструмент от ведущих производителей. В наличии широкий выбор электроинструмента, ручного инструмента и средств защиты.',
     items: [
@@ -52,7 +52,7 @@ export const categories: Category[] = [
     title: 'Отделочные материалы',
     titleShort: 'Отделка',
     subtitle: 'Плитка, ламинат, панели',
-    image: 'https://images.unsplash.com/photo-1706629503577-0f7da8b30aca?w=800&h=540&fit=crop&auto=format',
+    image: '/images/otdelochnye.jpg',
     description:
       'Всё для внутренней и наружной отделки: напольные и настенные покрытия, гипсокартон, облицовочные панели. Большой выбор цветов и фактур.',
     items: [
@@ -71,7 +71,7 @@ export const categories: Category[] = [
     title: 'Лаки и краски',
     titleShort: 'Краски',
     subtitle: 'Краски, грунтовки, шпатлёвки',
-    image: 'https://images.unsplash.com/photo-1585676737728-432f58d5fdba?w=800&h=540&fit=crop&auto=format',
+    image: '/images/kraski.jpg',
     description:
       'Лакокрасочные материалы для любых поверхностей: интерьер, фасад, дерево, металл. Грунтовки, шпатлёвки, клей для плитки и обоев.',
     items: [
@@ -90,7 +90,7 @@ export const categories: Category[] = [
     title: 'Сантехника',
     titleShort: 'Сантехника',
     subtitle: 'Трубы, смесители, радиаторы',
-    image: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&h=540&fit=crop&auto=format',
+    image: '/images/santehnika.jpg',
     description:
       'Полный ассортимент сантехники для ванных комнат, кухонь и систем отопления. Консультация по подбору и монтажу.',
     items: [
@@ -109,7 +109,7 @@ export const categories: Category[] = [
     title: 'Электрика',
     titleShort: 'Электрика',
     subtitle: 'Кабель, розетки, автоматы',
-    image: 'https://images.unsplash.com/photo-1635335874521-7987db781153?w=800&h=540&fit=crop&auto=format',
+    image: '/images/elektrika.jpg',
     description:
       'Электротехническая продукция для монтажа и замены электропроводки. Весь необходимый ассортимент для частного дома и квартиры.',
     items: [
@@ -128,7 +128,7 @@ export const categories: Category[] = [
     title: 'Крепёж и метизы',
     titleShort: 'Крепёж',
     subtitle: 'Дюбели, саморезы, болты',
-    image: 'https://images.unsplash.com/photo-1674503535026-a8f6ea1e3a30?w=800&h=540&fit=crop&auto=format',
+    image: '/images/krepezh.jpg',
     description:
       'Широкий ассортимент крепёжных изделий высокого качества для строительных, монтажных и ремонтных работ любой сложности.',
     items: [
@@ -147,7 +147,7 @@ export const categories: Category[] = [
     title: 'Садовый инвентарь',
     titleShort: 'Сад и дача',
     subtitle: 'Лопаты, шланги, газонокосилки',
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=540&fit=crop&auto=format',
+    image: '/images/sad.jpg',
     description:
       'Всё необходимое для работы в саду и на дачном участке: ручной инвентарь, поливочные системы, техника для ухода за газоном.',
     items: [
