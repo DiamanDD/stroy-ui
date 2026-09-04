@@ -7,6 +7,7 @@ import { CALLBACK, CONTACT } from '../constants/site';
 import { getCategoryBySlug } from '../data/categories';
 import { normalizeFio, sanitizeFioInput, validateFio } from '../lib/fioValidation';
 import { isCompletePhone, phoneMaskOnChange, phoneMaskOnFocus, phoneToE164 } from '../lib/phoneMask';
+import { reachGoal, YM_GOALS } from '../lib/metrika';
 import { submitLead } from '../lib/submitLead';
 
 interface FormState {
@@ -51,6 +52,7 @@ export default function Category() {
         category: category.title,
         website: form.website,
       });
+      reachGoal(YM_GOALS.leadSubmit, { category: category.title });
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Не удалось отправить заявку');
