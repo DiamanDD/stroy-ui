@@ -1,3 +1,4 @@
+import { plenkaMeta } from '../hypotheses/plenka';
 import { smMeta } from '../hypotheses/sm';
 
 export interface Hypothesis {
@@ -9,4 +10,4 @@ export interface Hypothesis {
 }
 
 /** Registry of all hypotheses shown on the hub. */
-export const hypotheses: Hypothesis[] = [smMeta];
+export const hypotheses: Hypothesis[] = [smMeta, plenkaMeta];
