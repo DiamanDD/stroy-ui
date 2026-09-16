@@ -1,9 +1,7 @@
 import { createBrowserRouter } from 'react-router';
-import RootLayout from './components/RootLayout';
-import Hub from './pages/Hub';
-import Home from './pages/Home';
-import Category from './pages/Category';
-import { STORE_BASE } from './constants/paths';
+import RootLayout from './shared/RootLayout';
+import Hub from './hub/Hub';
+import { smRoutes } from './hypotheses/sm';
 
 export const router = createBrowserRouter([
   {
@@ -13,14 +11,7 @@ export const router = createBrowserRouter([
         path: '/',
         Component: Hub,
       },
-      {
-        path: STORE_BASE,
-        Component: Home,
-      },
-      {
-        path: `${STORE_BASE}/category/:slug`,
-        Component: Category,
-      },
+      ...smRoutes,
       {
         path: '*',
         Component: Hub,

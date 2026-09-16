@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import BrandName from './BrandName';
 import PhoneIcon from './PhoneIcon';
-import { storePath } from '../constants/paths';
+import { storePath } from '../paths';
 import { CONTACT } from '../constants/site';
 
 export default function Header() {

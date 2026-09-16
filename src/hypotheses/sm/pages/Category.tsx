@@ -3,12 +3,12 @@ import { Link, useParams, Navigate } from 'react-router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PhoneIcon from '../components/PhoneIcon';
-import { storePath } from '../constants/paths';
+import { storePath } from '../paths';
 import { CALLBACK, CONTACT } from '../constants/site';
 import { getCategoryBySlug } from '../data/categories';
 import { normalizeFio, sanitizeFioInput, validateFio } from '../lib/fioValidation';
 import { isCompletePhone, phoneMaskOnChange, phoneMaskOnFocus, phoneToE164 } from '../lib/phoneMask';
-import { reachGoal, YM_GOALS } from '../lib/metrika';
+import { reachGoal, YM_GOALS } from '../../../shared/metrika';
 import { submitLead } from '../lib/submitLead';
 
 interface FormState {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { hypotheses } from '../data/hypotheses';
+import { hypotheses } from './hypotheses';
 
 export default function Hub() {
   return (

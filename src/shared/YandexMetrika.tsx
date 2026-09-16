@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router';
-import { hit, reachGoal, YM_GOALS } from '../lib/metrika';
+import { hit, reachGoal, YM_GOALS } from './metrika';
 
 /** SPA pageviews + phone-click goals for Yandex Metrika / Webvisor. */
 export default function YandexMetrika() {

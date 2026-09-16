@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BrandName from '../components/BrandName';
 import PhoneIcon from '../components/PhoneIcon';
-import { storePath } from '../constants/paths';
+import { storePath } from '../paths';
 import { CALLBACK, CONTACT, LOCATION, SITE, STATS, WORKING_DAYS_PER_WEEK } from '../constants/site';
 import { categories } from '../data/categories';
 
