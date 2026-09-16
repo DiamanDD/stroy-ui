@@ -22,6 +22,7 @@ services:
       context: .
       args:
         VITE_MAX_URL: ${VITE_MAX_URL}
+        GITHUB_SHA: ${GITHUB_SHA:-}
     environment:
       SSL_DOMAIN: ${SSL_DOMAIN}
     ports:

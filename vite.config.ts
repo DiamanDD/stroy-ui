@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
+      appBuildVersionPlugin(),
       figmaErrorOverlayReplay(),
       figmaReactRefreshBoundaryFallback(),
       figmaMakeKitPlugin({ storiesGlob: '/src/**/*.stories.{ts,tsx,js,jsx}' }),
@@ -51,6 +52,32 @@ export default defineConfig(({ mode }) => {
     },
   }
 })
+
+/** Emits version.json and injects __APP_BUILD_ID__ so clients can detect a new deploy. */
+function appBuildVersionPlugin(): Plugin {
+  const buildId =
+    process.env.GITHUB_SHA?.slice(0, 12) ||
+    process.env.SOURCE_DATE_EPOCH ||
+    Date.now().toString(36)
+
+  return {
+    name: 'app-build-version',
+    config() {
+      return {
+        define: {
+          __APP_BUILD_ID__: JSON.stringify(buildId),
+        },
+      }
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: JSON.stringify({ buildId }),
+      })
+    },
+  }
+}
 
 type FigmaSiteConfiguration = {
   title?: string
