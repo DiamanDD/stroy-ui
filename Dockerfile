@@ -22,8 +22,7 @@ RUN apk add --no-cache gettext
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY nginx.http.conf.template /etc/nginx/templates/http.conf.template
-COPY docker/htpasswd /etc/nginx/.htpasswd
 COPY docker/nginx-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh && chmod 644 /etc/nginx/.htpasswd
+RUN chmod +x /docker-entrypoint.sh
 
 CMD ["/docker-entrypoint.sh"]
