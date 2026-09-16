@@ -1,7 +1,12 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { hypotheses } from './hypotheses';
 
 export default function Hub() {
+  useEffect(() => {
+    document.title = 'Стенд гипотез — тестирование';
+  }, []);
+
   return (
     <div className="min-h-full bg-zinc-950 text-white">
       <div className="max-w-2xl mx-auto px-4 py-16 md:py-24">
