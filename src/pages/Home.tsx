@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BrandName from '../components/BrandName';
 import PhoneIcon from '../components/PhoneIcon';
+import { storePath } from '../constants/paths';
 import { CALLBACK, CONTACT, LOCATION, SITE, STATS, WORKING_DAYS_PER_WEEK } from '../constants/site';
 import { categories } from '../data/categories';
 
@@ -100,7 +101,7 @@ export default function Home() {
             {categories.map((cat) => (
               <Link
                 key={cat.slug}
-                to={`/category/${cat.slug}`}
+                to={storePath(`/category/${cat.slug}`)}
                 className="group block bg-white border border-gray-200 hover:border-orange-500 transition-all duration-200 overflow-hidden"
               >
                 {/* Image */}

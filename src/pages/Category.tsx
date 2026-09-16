@@ -3,6 +3,7 @@ import { Link, useParams, Navigate } from 'react-router';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PhoneIcon from '../components/PhoneIcon';
+import { storePath } from '../constants/paths';
 import { CALLBACK, CONTACT } from '../constants/site';
 import { getCategoryBySlug } from '../data/categories';
 import { normalizeFio, sanitizeFioInput, validateFio } from '../lib/fioValidation';
@@ -27,7 +28,7 @@ export default function Category() {
   const [submitError, setSubmitError] = useState('');
   const [errors, setErrors] = useState<Partial<FormState>>({});
 
-  if (!category) return <Navigate to="/" replace />;
+  if (!category) return <Navigate to={storePath()} replace />;
 
   function validate(): boolean {
     const next: Partial<FormState> = {};
@@ -68,7 +69,7 @@ export default function Category() {
       {/* Breadcrumb */}
       <div className="bg-gray-50 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-2 text-sm text-gray-500">
-          <Link to="/" className="hover:text-orange-500 transition-colors">Главная</Link>
+          <Link to={storePath()} className="hover:text-orange-500 transition-colors">Главная</Link>
           <span>/</span>
           <span className="text-zinc-950 font-500">{category.titleShort}</span>
         </div>
@@ -83,7 +84,7 @@ export default function Category() {
         />
         <div className="relative max-w-6xl mx-auto px-4 py-12 md:py-16">
           <Link
-            to="/"
+            to={storePath()}
             className="inline-flex items-center gap-1.5 text-gray-400 hover:text-white text-sm mb-6 transition-colors"
           >
             <BackIcon />

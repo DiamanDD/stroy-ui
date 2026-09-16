@@ -1,13 +1,14 @@
 import { Link } from 'react-router';
 import BrandName from './BrandName';
 import PhoneIcon from './PhoneIcon';
+import { storePath } from '../constants/paths';
 import { CONTACT } from '../constants/site';
 
 export default function Header() {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
+        <Link to={storePath()} className="flex items-center gap-2 shrink-0">
           <BrandName className="font-display text-xl font-700 tracking-wide text-zinc-950 leading-none" />
         </Link>
 
