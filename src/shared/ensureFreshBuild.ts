@@ -18,8 +18,8 @@ async function clearBrowserCaches(): Promise<void> {
 }
 
 /**
- * After deploy, an open tab may still run an old bundle (common on mobile).
- * Compare embedded build id with /version.json and hard-navigate once if stale.
+ * After deploy, a tab may still run an old bundle (common on mobile).
+ * Avoid query-param redirects — they break Basic Auth on iOS/WebViews.
  */
 export async function ensureFreshBuild(): Promise<void> {
   if (import.meta.env.DEV) return
@@ -29,7 +29,7 @@ export async function ensureFreshBuild(): Promise<void> {
 
     const response = await fetch(`/version.json?_=${Date.now()}`, {
       cache: 'no-store',
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: { Accept: 'application/json' },
     })
     if (!response.ok) return
@@ -41,7 +41,7 @@ export async function ensureFreshBuild(): Promise<void> {
     if (sessionStorage.getItem(flag)) return
 
     sessionStorage.setItem(flag, '1')
-    window.location.replace(`/?v=${encodeURIComponent(data.buildId)}`)
+    window.location.reload()
   } catch {
     // Offline / blocked — keep current bundle.
   }
